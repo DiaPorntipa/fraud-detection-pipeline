@@ -80,7 +80,7 @@ def main():
     search = RandomizedSearchCV(
         pipe,
         param_distributions=param_distributions,
-        n_iter=1,  # TODO: Increase iteration if time allows for better model performance
+        n_iter=20,  # TODO: Increase iteration if time allows for better model performance
         scoring="average_precision",   # PR-AUC, defualt metric for fraud detection
         cv=cv,
         n_jobs=-1,
