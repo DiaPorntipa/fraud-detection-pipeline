@@ -78,3 +78,28 @@ python src/train_lgbm.py   # TODO
 
 **Model comparison:**
 Models are compared by **PR-AUC + Recall\@Precision≥95%**; the higher-performing model at the chosen operating point is selected for serving.
+
+### Model performance report
+![RandomForest model performance](images/rf_model_performance.png)
+
+**Best params (RandomizedSearchCV):**
+`bootstrap=True, class_weight=balanced_subsample, max_depth=8, max_features=0.5, min_samples_leaf=2, n_estimators=100`
+
+**Test (model-only):**
+
+* PR-AUC: **0.9986** ROC-AUC: **0.9997**
+* Recall\@Precision ≥ **95%**: **0.9970** (threshold **0.5167**)
+* Confusion matrix: TN **551,992**, FP **85**, FN **5**, TP **1,638**
+
+**Interpretation:**
+
+* Precision ≈ **95%** → \~**5%** of alerts are false alarms.
+* Recall ≈ **99.7%** → model catches **almost all** fraud in test (only **5** missed).
+
+* False Positive (FP) = predict fraud but it’s actually normal.
+ → Customer inconvenience (declines/holds), blocked transactions/cards, reputational hit, operational review cost.
+
+* False Negative (FN) = predict normal but it’s actually fraud.
+ → Direct financial loss/chargebacks, legal/compliance risk, downstream fraud, loss of customer trust.
+
+In fraud, FNs usually cost more but too many FPs still anger customers → choose a threshold P≥95% to balance.
