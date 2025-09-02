@@ -17,16 +17,13 @@ DATA_PATH = Path("data/processed.csv")  # from data_prep.py
 MODEL_DIR = Path("models")
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 MODEL_PATH = MODEL_DIR / "fraud_rf.pkl"
-RISK_TYPES_PATH = MODEL_DIR / "risk_types.json"
 METRICS_PATH = MODEL_DIR / "rf_metrics.json"
+DATA_DIR = Path("data")
+RISK_TYPES_PATH = DATA_DIR / "risk_types.json"
+
 
 RANDOM_STATE = 42
 TEST_SIZE = 0.20
-RISK_TYPES = {"CASH_OUT", "TRANSFER"}
-with open(RISK_TYPES_PATH, "w") as f:
-    json.dump(sorted(RISK_TYPES), f, indent=2)
-print(
-    f"Saved predetermined risk types ({', '.join(sorted(RISK_TYPES))}) to: {RISK_TYPES_PATH}")
 
 
 def main():
@@ -42,9 +39,12 @@ def main():
     )
 
     # Risk types sanity check on TRAIN
+    with open(RISK_TYPES_PATH) as f:
+        RISK_TYPES = set(json.load(f))
     assert y_train[~X_train["transac_type"].isin(RISK_TYPES)].sum() == 0, \
         "Found fraud in non-risk types—update RISK_TYPES or drop this assert."
 
+    # TODO: Add option for training the entire dataset without using rule-based filtering
     X_train_risk, y_train_risk = drop_rule_based_rows(X_train, y_train)
 
     # --- Build pipeline ---

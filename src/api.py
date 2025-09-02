@@ -13,10 +13,12 @@ import logging
 log = logging.getLogger("uvicorn.error")
 
 
-MODELS = Path("models")
-pipe = joblib.load(MODELS / "fraud_rf.pkl")
-RISK = set(json.load(open(MODELS / "risk_types.json")))
-THRESHOLD = json.load(open(MODELS / "rf_metrics.json")).get("threshold", 0.5)
+MODEL_DIR = Path("models")
+DATA_DIR = Path("data")
+pipe = joblib.load(MODEL_DIR / "fraud_best.pkl")
+RISK = set(json.load(open(DATA_DIR / "risk_types.json")))
+THRESHOLD = json.load(
+    open(MODEL_DIR / "best_metrics.json")).get("threshold", 0.5)
 
 
 @asynccontextmanager

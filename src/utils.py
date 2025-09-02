@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 
-MODEL_DIR = Path("models")
-RISK_TYPES_PATH = MODEL_DIR / "risk_types.json"
+
+DATA_DIR = Path("data")
+RISK_TYPES_PATH = DATA_DIR / "risk_types.json"
 
 
 def drop_rule_based_rows(X, y):
