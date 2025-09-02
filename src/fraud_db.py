@@ -36,7 +36,7 @@ def save_fraud_rule(tx: dict):
         )
 
 
-def save_fraud_ml(tx: dict, proba: float, thr: float, pred: int):
+def save_fraud_ml(tx: dict, proba: float, thr: float):
     with get_conn() as con:
         con.execute(
             "INSERT INTO frauds(tx_json, reason, proba, threshold) VALUES(?,?,?,?)",

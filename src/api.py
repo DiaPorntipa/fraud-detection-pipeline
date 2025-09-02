@@ -56,10 +56,11 @@ def predict(tx: Tx):
     tx_dict = tx.model_dump()
 
     # Rule-based prediction
-    # TODO (LOW): Add red flaf catching
     if tx_dict["amount"] > 200_000:
         save_fraud_rule(tx_dict)
         return {"fraud": 1, "reason": "rule_amount_cap"}
+    # TODO: Add option for not using transac_type rule-based prediction
+    # TODO (LOW): Add red flaf catching
     if tx_dict["transac_type"] not in RISK:
         return {"fraud": 0, "reason": "non_risk_type"}
 
