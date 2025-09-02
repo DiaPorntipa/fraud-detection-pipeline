@@ -7,3 +7,5 @@ python-multipart
 matplotlib
 seaborn
 pydantic
+pytest
+httpx
