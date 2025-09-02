@@ -1,43 +1,94 @@
 # fraud-detection-pipeline
 
-## How to use
+## How to run
 
-**0) Setup**
+### 0) Setup
 
 ```bash
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**1) EDA**
+### 1) EDA
 
-* Open `notebooks/01_eda.ipynb` and run all cells.
+Open `notebooks/01_eda.ipynb` and run all cells. It will write `models/risk_types.json`.
 
-**2) Preprocess**
+### 2) Preprocess
 
 ```bash
 python src/data_prep.py
-# outputs: data/processed.csv
+# writes: data/processed.csv
 ```
 
-**3) Train (Random Forest)**
+### 3) Train (Random Forest)
 
 ```bash
 python src/train_rf.py
-# outputs: models/fraud_rf.pkl, models/rf_metrics.json
+# writes: models/fraud_rf.pkl, models/rf_metrics.json
 ```
 
-**4) (Optional) Train LightGBM**
+### 4) (Optional) Train LightGBM
 
 ```bash
 python src/train_lgbm.py   # TODO
-# expected: models/fraud_lgbm.pkl, models/lgbm_metrics.json
+# writes: models/fraud_lgbm.pkl, models/lgbm_metrics.json
 ```
 
-**5) Compare & choose**
+### 5) Choose model for serving
 
-* Compare `*_metrics.json` on **PR-AUC** and **Recall\@Precision≥95%**.
-* Pick the better model for serving (save as `models/fraud_best.pkl`).
+Pick using **PR-AUC** + **Recall\@Precision≥95%**, then set the “best” files:
+
+```bash
+cp models/fraud_rf.pkl models/fraud_best.pkl
+cp models/rf_metrics.json models/best_metrics.json
+```
+
+### 6) Run API
+
+```bash
+uvicorn src.api:app --reload
+# Docs: http://127.0.0.1:8000/docs
+```
+
+### 7) Test endpoints
+
+```bash
+# Predict (raw schema example)
+curl -s -X POST http://127.0.0.1:8000/predict \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "time_ind": 1,
+    "transac_type": "CASH_OUT",
+    "amount": 181.0,
+    "src_acc": "acc4182296",
+    "src_bal": 181.0,
+    "src_new_bal": 0.0,
+    "dst_acc": "acc1221153",
+    "dst_bal": 21182.0,
+    "dst_new_bal": 0.0
+  }'
+
+# List stored frauds (SQLite)
+curl -s http://127.0.0.1:8000/frauds
+```
+
+### 8) Inspect the DB
+
+```bash
+sqlite3 data/frauds.db
+.tables
+.schema frauds
+SELECT * FROM frauds ORDER BY id DESC LIMIT 5;
+.quit
+```
+
+**Notes**
+
+* Inference threshold is read from `models/best_metrics.json`.
+* Hybrid rules:
+  • Illegal amount (>200,000) → auto-flag.
+  • Non-risk types → auto-predict 0. (Insights from EDA)
+  • Risk types (`CASH_OUT`, `TRANSFER`) → scored by the model.
 
 
 ## Model training
@@ -56,7 +107,7 @@ python src/train_lgbm.py   # TODO
 * **Rules first (deterministic, auditable):**
 
   * `is_flagged_fraud == 1` (amount > 200,000) → label fraud.
-  * Non-risk types from TRAIN EDA (`CASH_IN`, `DEBIT`, `PAYMENT`) had 0 fraud → routed as non-fraud unless simple red flags apply (documented in API).
+  * Non-risk types from TRAIN EDA (`CASH_IN`, `DEBIT`, `PAYMENT`) had 0 fraud → routed as non-fraud.
 * **ML next (subtle patterns):**
 
   * Chosen: **RandomForest** (handles non-linearities, mixed features, robust, fast to deploy).
