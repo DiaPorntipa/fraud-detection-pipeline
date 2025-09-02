@@ -1,5 +1,7 @@
 from pathlib import Path
 from contextlib import asynccontextmanager
+from typing import Literal
+from src.features import feature_engineering
 from src.fraud_db import init_db, save_fraud_rule, save_fraud_ml, list_frauds
 import joblib
 from fastapi import FastAPI
@@ -25,15 +27,26 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Fraud API", lifespan=lifespan)
 
 
-class Tx(BaseModel):  # Tansaction
-    transac_type: str
+class Tx(BaseModel):
+    time_ind: int
+    transac_type: Literal["CASH_IN", "CASH_OUT",
+                          "DEBIT", "PAYMENT", "TRANSFER"]
     amount: float
+    src_acc: str
     src_bal: float
-    dst_bal: Optional[float] = None
-    hour: int
-    day_of_week: int
-    flag_any_inconsistency: int
-    amount_over_src: float
+    src_new_bal: float
+    dst_acc: str
+    dst_bal: Optional[float] = 0.0
+    dst_new_bal: Optional[float] = 0.0
+
+
+def select_columns(df: pd.DataFrame) -> pd.DataFrame:
+    keep = [
+        "transac_type", "amount", "src_bal", "dst_bal",
+        "hour", "day_of_week", "flag_any_inconsistency", "amount_over_src"
+    ]
+
+    return df[keep]
 
 
 @app.post("/predict")
@@ -48,8 +61,12 @@ def predict(tx: Tx):
     if tx_dict["transac_type"] not in RISK:
         return {"fraud": 0, "reason": "non_risk_type"}
 
-    # Model prediction
+    # Data preprocessing
     row = pd.DataFrame([tx_dict])
+    row = feature_engineering(row)
+    row = select_columns(row)
+
+    # Model prediction
     proba = float(pipe.predict_proba(row)[:, 1][0])
     pred = int(proba >= THRESHOLD)
 

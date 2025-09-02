@@ -1,20 +1,9 @@
 import pandas as pd
-import numpy as np
 from pathlib import Path
-from features import make_time_feats, integrity_flags
+from features import feature_engineering
 
 IN_PATH = Path("data/fraud_mock.csv")
 OUT_PATH = Path("data/processed.csv")
-
-
-def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
-    df = make_time_feats(df)
-    df = integrity_flags(df)
-
-    df["amount_over_src"] = df["amount"] / (df["src_bal"].replace(0, np.nan))
-    df["amount_over_src"] = df["amount_over_src"].fillna(0).round(4)
-
-    return df
 
 
 def select_columns(df: pd.DataFrame) -> pd.DataFrame:
