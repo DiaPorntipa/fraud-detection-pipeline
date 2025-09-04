@@ -4,10 +4,30 @@
 
 ### 0) Setup
 
+1. Clone the repo:
 ```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+git clone https://github.com/DiaPorntipa/fraud-detection-pipeline.git
+cd fraud-detection-pipeline
+````
+
+2. Create a Python 3.9.6 virtual environment:
+
+```bash
+python3.9 -m venv .venv
+source .venv/bin/activate    # Mac/Linux
+.venv\Scripts\activate       # Windows
+```
+
+3. Install dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
+
+4. Download fraud dataset
+```bash
+curl -o data/fraud_mock.csv https://scbpocseasta001stdsbx.z23.web.core.windows.net/fraud_mock.csv
+``` 
 
 ### 1) EDA
 
@@ -89,6 +109,21 @@ SELECT * FROM frauds ORDER BY id DESC LIMIT 5;
   • Illegal amount (>200,000) → auto-flag.
   • Non-risk types → auto-predict 0. (Insights from EDA)
   • Risk types (`CASH_OUT`, `TRANSFER`) → scored by the model.
+
+
+## Dependencies
+
+- **fastapi** – framework to build the REST API service.  
+- **uvicorn[standard]** – ASGI server to run the FastAPI app.  
+- **pandas** – data handling and preprocessing for EDA and training.  
+- **scikit-learn** – ML algorithms, preprocessing, and evaluation metrics.  
+- **joblib** – saving and loading trained ML models.  
+- **python-multipart** – support for form-data uploads in FastAPI.  
+- **matplotlib** – data visualization (plots, charts).  
+- **seaborn** – statistical visualization for EDA.  
+- **pydantic** – data validation and request/response models in FastAPI.  
+- **pytest** – testing framework for unit/integration tests.  
+- **httpx** – HTTP client for testing API endpoints.  
 
 
 ## Model training
