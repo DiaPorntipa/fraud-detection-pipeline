@@ -7,6 +7,9 @@ OUT_PATH = Path("data/processed.csv")
 
 
 def select_columns(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Select a subset of columns for modeling.
+    '''
     keep = [
         "transac_type", "amount", "src_bal", "dst_bal",
         "hour", "day_of_week", "flag_any_inconsistency", "amount_over_src",

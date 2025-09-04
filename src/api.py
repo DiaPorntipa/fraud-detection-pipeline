@@ -30,6 +30,9 @@ app = FastAPI(title="Fraud API", lifespan=lifespan)
 
 
 class Tx(BaseModel):
+    '''
+    Transaction input data model.
+    '''
     time_ind: int
     transac_type: Literal["CASH_IN", "CASH_OUT",
                           "DEBIT", "PAYMENT", "TRANSFER"]
@@ -43,6 +46,9 @@ class Tx(BaseModel):
 
 
 def select_columns(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Select a subset of columns for parsing to the ML model.
+    '''
     keep = [
         "transac_type", "amount", "src_bal", "dst_bal",
         "hour", "day_of_week", "flag_any_inconsistency", "amount_over_src"
@@ -53,6 +59,9 @@ def select_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 @app.post("/predict")
 def predict(tx: Tx):
+    '''
+    Predict fraud for a given transaction. Apply rule-based checks first, then ML model if needed. If fraud is detected, save to the database.
+    '''
     tx_dict = tx.model_dump()
 
     # Rule-based prediction
@@ -80,4 +89,7 @@ def predict(tx: Tx):
 
 @app.get("/frauds")
 def get_frauds():
+    '''
+    Get a list of all fraud cases.
+    '''
     return list_frauds()

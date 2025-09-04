@@ -9,6 +9,10 @@ from utils import drop_rule_based_rows
 
 
 def hybrid_eval(pipe, X_test, y_test, metrics_path="metrics.json", min_precision=0.95):
+    '''
+    Evaluate the trained model on test data.
+    The current state includes only model-based evaluation, but the goal is to extend it to hybrid evaluation (rule-based + ML).
+    '''
     # TODO: Implement hybrid evaluation: apply rule-based checks (amount > 200000) and route
     #       non-risk types before computing metrics.
     X_test, y_test = drop_rule_based_rows(X_test, y_test)

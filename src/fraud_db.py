@@ -7,10 +7,16 @@ DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
 def get_conn():
+    '''
+    Get a connection to the SQLite database.
+    '''
     return sqlite3.connect(DB_PATH, check_same_thread=False)
 
 
 def init_db():
+    '''
+    Initialize the SQLite database and create the frauds table if it doesn't exist.
+    '''
     with get_conn() as con:
         # TODO (LOW): Consider adding "CREATE INDEX IF NOT EXISTS idx_frauds_status_ts ON frauds(status, ts);"
         con.executescript("""
@@ -29,6 +35,9 @@ def init_db():
 
 
 def save_fraud_rule(tx: dict):
+    '''
+    Save a fraud case detected by the rule-based system.
+    '''
     with get_conn() as con:
         con.execute(
             "INSERT INTO frauds(tx_json, reason) VALUES(?,?)",
@@ -37,6 +46,9 @@ def save_fraud_rule(tx: dict):
 
 
 def save_fraud_ml(tx: dict, proba: float, thr: float):
+    '''
+    Save a fraud case detected by the ML model.
+    '''
     with get_conn() as con:
         con.execute(
             "INSERT INTO frauds(tx_json, reason, proba, threshold) VALUES(?,?,?,?)",
@@ -45,6 +57,9 @@ def save_fraud_ml(tx: dict, proba: float, thr: float):
 
 
 def list_frauds(limit: int = 100):
+    '''
+    List fraud cases from the database, limited to the most recent `limit` entries.
+    '''
     with get_conn() as con:
         rows = con.execute(
             "SELECT id, ts, tx_json, reason, proba, threshold, status "

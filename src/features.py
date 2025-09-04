@@ -3,6 +3,9 @@ import numpy as np
 
 
 def make_time_feats(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Create time-based features from the time index. Hour of day and day of week.
+    '''
     df["hour"] = df["time_ind"] % 24
     df["day_of_week"] = (df["time_ind"] // 24) % 7
 
@@ -10,6 +13,11 @@ def make_time_feats(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def integrity_flags(df: pd.DataFrame, atol=1e-6) -> pd.DataFrame:
+    '''
+    Create flags for inconsistencies in transaction data.
+    Flags include overdraft, source balance mismatch, and destination balance mismatch.
+    flag_any_inconsistency is set if any of the individual flags are set.
+    '''
     # TODO: Consider dropping the line below for better memory usage
     df = df.copy()
 
@@ -35,6 +43,9 @@ def integrity_flags(df: pd.DataFrame, atol=1e-6) -> pd.DataFrame:
 
 
 def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Apply feature engineering to the transaction data.
+    '''
     df = make_time_feats(df)
     df = integrity_flags(df)
 

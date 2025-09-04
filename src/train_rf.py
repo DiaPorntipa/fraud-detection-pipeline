@@ -26,10 +26,11 @@ RANDOM_STATE = 42
 TEST_SIZE = 0.20
 
 
-def main():
-    df = pd.read_csv(DATA_PATH)
-
-    # --- Training data preparation ---
+def model_input_prep(df: pd.DataFrame):
+    '''
+    Prepare model input data by splitting into training and test sets,
+    and applying rule-based filtering to the training set.
+    '''
     # Train/test split
     X_train, X_test, y_train, y_test = train_test_split(
         df.drop(columns=["is_fraud"]), df["is_fraud"],
@@ -46,6 +47,15 @@ def main():
 
     # TODO: Add option for training the entire dataset without using rule-based filtering
     X_train_risk, y_train_risk = drop_rule_based_rows(X_train, y_train)
+    print(
+        f"Training on {len(X_train_risk):,} risk rows (fraud rate: {100*y_train_risk.mean():.4f}%)")
+
+    return X_train_risk, y_train_risk, X_test, y_test
+
+
+def main():
+    df = pd.read_csv(DATA_PATH)
+    X_train_risk, y_train_risk, X_test, y_test = model_input_prep(df)
 
     # --- Build pipeline ---
     drop_cols = {"transac_type"}

@@ -7,6 +7,10 @@ RISK_TYPES_PATH = DATA_DIR / "risk_types.json"
 
 
 def drop_rule_based_rows(X, y):
+    '''
+    Drop rows that would be caught by the rule-based system.
+    This includes transactions of non-risk types and those that are illegal amounts.
+    '''
     # load risk types
     with open(RISK_TYPES_PATH) as f:
         RISK_TYPES = set(json.load(f))
