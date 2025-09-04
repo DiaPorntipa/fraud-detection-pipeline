@@ -83,7 +83,7 @@ def predict(tx: Tx):
     pred = int(proba >= THRESHOLD)
 
     if pred:
-        save_fraud_ml(tx_dict, proba, THRESHOLD, pred)
+        save_fraud_ml(tx_dict, proba, THRESHOLD)
     return {"fraud": pred, "proba": proba, "threshold": THRESHOLD, "reason": "model"}
 
 
